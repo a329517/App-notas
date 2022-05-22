@@ -9,7 +9,29 @@
         <div class="py-12">
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                    <welcome />
+                    <table class="min-w-full divide-y divide-gray-200 w-full">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Categoría
+								</th>
+                                <th scope="col" class="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Total
+								</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr v-for="categoria in news_by_category" :key="categoria.id">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {{categoria.category_name}}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <!-- {{categoria.category_status}} -->          
+                                    {{categoria.total}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -25,6 +47,9 @@
         components: {
             AppLayout,
             Welcome,
+        },
+        props: {
+            news_by_category: Array
         },
     })
 </script>

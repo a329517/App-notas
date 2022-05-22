@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Auth;
+use DB;
 
 class NotaController extends Controller
 {
@@ -19,7 +21,13 @@ class NotaController extends Controller
         //ORM, Objetos mapeados a las tablas
         //SELECT * FROM NOTAS;
         //$notas = Nota::get();
-        $notas = Nota::where('users_id', Auth::id())->get();
+        //$notas = Nota::where('users_id', Auth::id())->get();
+        $notas = DB::table('notas')
+            ->join('categories', 'notas.categories_id', '=','categories.id')
+            ->where('users_id', Auth::id())
+            ->select('notas.*','category_name')
+            ->get();
+
         return Inertia::render('Notas/Index', [
             'notas' => $notas
         ]);
@@ -32,7 +40,11 @@ class NotaController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Notas/Create');
+        $categories = Category::where('category_status', true)->get();
+
+        return Inertia::render('Notas/Create', [
+            'categories' => $categories
+        ]);
     }
 
     /**
@@ -46,7 +58,8 @@ class NotaController extends Controller
 
         $request->validate([
             'titulo' => 'required',
-            'contenido' => 'required'
+            'contenido' => 'required',
+            'categories_id' => 'required'
         ]);
 
         //Nota::create($request->all());
@@ -54,6 +67,7 @@ class NotaController extends Controller
         $nota =  new Nota;
         $nota->titulo = $request->titulo;
         $nota->contenido = $request->contenido;
+        $nota->categories_id = $request->categories_id;
         $nota->users_id = Auth::id(); //id del usuario que este conectado
         $nota->save();
 
@@ -70,8 +84,14 @@ class NotaController extends Controller
     {
         //where('users_id', Auth::id())->get();
         //$nota = Nota::findOrFail($id);
-        $nota = Nota::where('id', $id)->where('users_id', Auth::id())->first();
+        // $nota = Nota::where('id', $id)->where('users_id', Auth::id())->first();
 
+        $nota = DB::table('notas')
+        ->join('categories', 'notas.categories_id', '=','categories.id')
+        ->where('notas.id', $id)
+        ->where('users_id', Auth::id())
+        ->select('notas.*','category_name')
+        ->first();
 
         return Inertia::render('Notas/Show', [
             'nota' => $nota
@@ -88,9 +108,11 @@ class NotaController extends Controller
     {
         //$nota = Nota::findOrFail($id);
         $nota = Nota::where('id', $id)->where('users_id', Auth::id())->first();
+        $categories = Category::where('category_status', true)->get();
 
         return Inertia::render('Notas/Edit', [
-            'nota' => $nota
+            'nota' => $nota,
+            'categories' => $categories,
         ]);
     }
 
@@ -105,7 +127,8 @@ class NotaController extends Controller
     {
         $request->validate([
             'titulo' => 'required',
-            'contenido' => 'required'
+            'contenido' => 'required',
+            'categories_id' => 'required',
         ]);
 
         $nota = Nota::where('id', $id)->where('users_id', Auth::id())->first();
